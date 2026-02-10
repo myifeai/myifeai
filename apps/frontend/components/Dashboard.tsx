@@ -15,7 +15,8 @@ export default function DailyPlan() {
   const [error, setError] = useState<string | null>(null);
   const { getToken } = useAuth();
 
-  const BACKEND_URL = 'https://your-backend-api.vercel.app'; 
+  // This tells TypeScript: "Use the env variable, but if it's missing, use this string as a fallback"
+  const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || '';
 
   // 1. Fetch Plan and Profile Data
   const fetchData = async () => {
