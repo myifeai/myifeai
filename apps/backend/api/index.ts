@@ -29,4 +29,17 @@ app.get('/api/daily-actions', requireAuth(), async (req, res) => {
   }
 });
 
+// // --- TEMPORARY TESTING BLOCK ---
+// const PORT = process.env.PORT || 3001;
+
+// // Only runs when you execute the file directly (e.g., npx ts-node)
+// // Vercel will ignore this because it only uses the 'export default app'
+// if (require.main === module || process.env.NODE_ENV !== 'production') {
+//   app.listen(PORT, () => {
+//     console.log(`🚀 Logic check running at http://localhost:${PORT}`);
+//     console.log(`🔗 Health check: http://localhost:${PORT}/api/health`);
+//   });
+// }
+// // -------------------------------
+
 export default app; // Vercel requirement for serverless functions
