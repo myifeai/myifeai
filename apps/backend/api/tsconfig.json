@@ -9,5 +9,5 @@
     "skipLibCheck": true,
     "moduleResolution": "node"
   },
-  "include": ["api/**/*", "src/**/*"]
+  "include": ["**/*.ts"]
 }
