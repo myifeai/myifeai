@@ -36,7 +36,7 @@ export const handleClerkWebhook = async (req: any, res: any) => {
     try {
       console.log(`Syncing user to Supabase: ${id}`);
 
-      // 1. Sync Profile - Updated to use 'full_name' and 'xp_points'
+      // 1. Sync Profile - Using 'full_name' as verified in your DB schema
       const { error: profileError } = await supabase
         .from('profiles')
         .upsert([
@@ -52,8 +52,9 @@ export const handleClerkWebhook = async (req: any, res: any) => {
         return res.status(500).json({ error: profileError.message });
       }
 
-      // 2. Initialize Life Scores (Ensure these columns match your life_scores table)
-      const domains = ['Health', 'Wealth', 'Social', 'Mindset'];
+      // 2. Initialize Life Scores - Updated to match your DB's CHECK constraint
+      const domains = ['Health', 'Wealth', 'Career', 'Relationships', 'Balance'];
+      
       const initialScores = domains.map(domain => ({
         user_id: id,
         domain: domain,
@@ -69,7 +70,7 @@ export const handleClerkWebhook = async (req: any, res: any) => {
         return res.status(500).json({ error: scoreError.message });
       }
 
-      console.log(`✅ User ${id} initialized with full_name and xp_points.`);
+      console.log(`✅ User ${id} successfully initialized with ${domains.length} domains.`);
       return res.status(200).json({ message: "Success" });
 
     } catch (err: any) {
