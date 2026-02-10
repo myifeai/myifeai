@@ -10,6 +10,7 @@ export const handleClerkWebhook = async (req: any, res: any) => {
   const WEBHOOK_SECRET = process.env.CLERK_WEBHOOK_SIGNING_SECRET;
   if (!WEBHOOK_SECRET) return res.status(500).json({ error: "Missing secret" });
 
+  // Convert Buffer to String for Svix verification
   const payload = req.body.toString(); 
   const headers = req.headers;
   const wh = new Webhook(WEBHOOK_SECRET);
@@ -22,6 +23,7 @@ export const handleClerkWebhook = async (req: any, res: any) => {
       "svix-signature": headers["svix-signature"] as string,
     });
   } catch (err) {
+    console.error("❌ Webhook verification failed");
     return res.status(400).json({ error: "Invalid signature" });
   }
 
@@ -32,23 +34,29 @@ export const handleClerkWebhook = async (req: any, res: any) => {
     const fullName = `${first_name || ''} ${last_name || ''}`.trim();
 
     try {
-      console.log(`Attempting to sync user: ${id}`);
+      console.log(`Syncing user to Supabase: ${id}`);
 
-      // 1. Sync Profile with Error Check
+      // 1. Sync Profile - Updated to use 'full_name' and 'xp_points'
       const { error: profileError } = await supabase
         .from('profiles')
-        .upsert([{ id, display_name: fullName || 'New User' }], { onConflict: 'id' });
+        .upsert([
+          { 
+            id: id, 
+            full_name: fullName || 'New User',
+            xp_points: 0 
+          }
+        ], { onConflict: 'id' });
 
       if (profileError) {
         console.error("❌ PROFILE INSERT ERROR:", profileError.message);
         return res.status(500).json({ error: profileError.message });
       }
 
-      // 2. Initialize Scores with Error Check
+      // 2. Initialize Life Scores (Ensure these columns match your life_scores table)
       const domains = ['Health', 'Wealth', 'Social', 'Mindset'];
       const initialScores = domains.map(domain => ({
         user_id: id,
-        domain,
+        domain: domain,
         score: 0
       }));
 
@@ -61,11 +69,11 @@ export const handleClerkWebhook = async (req: any, res: any) => {
         return res.status(500).json({ error: scoreError.message });
       }
 
-      console.log(`✅ User ${id} successfully committed to DB.`);
+      console.log(`✅ User ${id} initialized with full_name and xp_points.`);
       return res.status(200).json({ message: "Success" });
 
     } catch (err: any) {
-      console.error("🔥 CRITICAL WEBHOOK CRASH:", err.message);
+      console.error("🔥 Webhook processing error:", err.message);
       return res.status(500).json({ error: err.message });
     }
   }
