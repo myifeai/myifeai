@@ -2,8 +2,8 @@ import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import { clerkMiddleware, getAuth } from '@clerk/express';
-import { generateDailyPlan } from './ai-engine';
-import { handleClerkWebhook } from './webhook'; // Ensure you have this import!
+import { generateDailyPlan } from '../ai-engine';
+import { handleClerkWebhook } from '../webhook'; // Ensure you have this import!
 
 const app = express();
 app.use(cors());
