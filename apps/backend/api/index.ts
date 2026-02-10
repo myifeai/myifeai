@@ -15,17 +15,25 @@ app.use(clerkMiddleware());
 app.get('/api/health', (req, res) => res.status(200).send('Myfe AI Backend is Live!'));
 
 // Protected AI Route: Mobile app calls this to get suggestions
-app.get('/api/daily-actions', requireAuth(), async (req, res) => {
+// 1. Remove requireAuth() from the route
+app.get('/api/daily-actions', async (req, res) => {
+  // 2. Use getAuth to check the session manually
   const { userId } = getAuth(req);
-  
-  if (!userId) return res.status(401).json({ error: "Unauthorized" });
+
+  // 3. If no userId, return a 401 JSON error (No redirect!)
+  if (!userId) {
+    return res.status(401).json({ 
+      error: "Unauthorized", 
+      message: "Please log in to access your daily actions." 
+    });
+  }
 
   try {
     const plan = await generateDailyPlan(userId);
     res.json(plan);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "AI Engine or DB failed" });
+    res.status(500).json({ error: "AI Engine failed" });
   }
 });
 
