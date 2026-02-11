@@ -1,10 +1,14 @@
 import { createClerkClient } from '@clerk/backend';
 import { generateDailyPlan } from '../ai-engine';
 
-const clerkClient = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY });
+// 1. Explicitly pull keys from process.env
+const secretKey = process.env.CLERK_SECRET_KEY;
+const publishableKey = process.env.CLERK_PUBLISHABLE_KEY;
+
+// 2. Initialize the client
+const clerkClient = createClerkClient({ secretKey, publishableKey });
 
 export default async function handler(req: any, res: any) {
-  // 1. CORS Headers
   res.setHeader('Access-Control-Allow-Origin', 'https://myifeai-frontend.vercel.app'); 
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
@@ -12,31 +16,29 @@ export default async function handler(req: any, res: any) {
   if (req.method === 'OPTIONS') return res.status(200).end();
 
   try {
-    // 2. Prepare the URL for Clerk
+    // 3. Construct absolute URL
     const protocol = req.headers['x-forwarded-proto'] || 'https';
     const host = req.headers.host;
     const absoluteUrl = new URL(req.url || '', `${protocol}://${host}`).toString();
 
-    // 3. NEW CORE 2 SYNTAX: Pass req and options separately
-    // We map the incoming 'req' to a Request-like object that Clerk expects
+    // 4. Manual Authentication - Passing keys explicitly in options
     const requestState = await clerkClient.authenticateRequest(
-      // First argument: The request object with a 'url' property
       Object.assign(req, { url: absoluteUrl }), 
-      // Second argument: The options
       {
+        publishableKey, // Passing here ensures the "missing key" error is resolved
+        secretKey,
         authorizedParties: ['https://myifeai-frontend.vercel.app']
       }
     );
 
     const auth = requestState.toAuth();
 
-    // 4. FIX: Check for session existence to clear 'userId' red line
+    // 5. Check session
     if (!auth || !auth.sessionId) {
       console.error("❌ Auth Failed: No session found");
       return res.status(401).json({ error: "Unauthorized" });
     }
 
-    // By checking for sessionId first, TS allows access to userId safely
     const userId = auth.userId as string;
 
     console.log(`🤖 Generating plan for user: ${userId}`);
@@ -46,6 +48,7 @@ export default async function handler(req: any, res: any) {
 
   } catch (error: any) {
     console.error("Backend Error:", error.message);
+    // Include details in response to see if it's STILL complaining about the key
     return res.status(500).json({ error: "Internal Error", details: error.message });
   }
 }
