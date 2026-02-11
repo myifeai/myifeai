@@ -1,48 +1,51 @@
 import { createClerkClient } from '@clerk/backend';
 import { generateDailyPlan } from '../ai-engine';
 
-// Initialize the Clerk Client with your Secret Key
 const clerkClient = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY });
 
 export default async function handler(req: any, res: any) {
-  // 1. CORS Headers - Match your frontend Vercel URL
+  // 1. CORS Headers
   res.setHeader('Access-Control-Allow-Origin', 'https://myifeai-frontend.vercel.app'); 
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
-  // Handle Preflight request
   if (req.method === 'OPTIONS') return res.status(200).end();
 
   try {
-    // 2. Authenticate the request
-    // Clerk automatically looks for the 'Authorization: Bearer ...' header here
-    const requestState = await clerkClient.authenticateRequest(req, {
-      authorizedParties: ['https://myifeai-frontend.vercel.app']
-    });
+    // 2. Prepare the URL for Clerk
+    const protocol = req.headers['x-forwarded-proto'] || 'https';
+    const host = req.headers.host;
+    const absoluteUrl = new URL(req.url || '', `${protocol}://${host}`).toString();
+
+    // 3. NEW CORE 2 SYNTAX: Pass req and options separately
+    // We map the incoming 'req' to a Request-like object that Clerk expects
+    const requestState = await clerkClient.authenticateRequest(
+      // First argument: The request object with a 'url' property
+      Object.assign(req, { url: absoluteUrl }), 
+      // Second argument: The options
+      {
+        authorizedParties: ['https://myifeai-frontend.vercel.app']
+      }
+    );
 
     const auth = requestState.toAuth();
 
-    // 3. Type Guard: This fixes the red "userId" error
-    // We check if userId exists to satisfy TypeScript's SignedInAuthObject requirement
-    if (!auth || !auth.userId) {
-      console.error("❌ Authentication failed: No valid userId found");
+    // 4. FIX: Check for session existence to clear 'userId' red line
+    if (!auth || !auth.sessionId) {
+      console.error("❌ Auth Failed: No session found");
       return res.status(401).json({ error: "Unauthorized" });
     }
 
-    // TypeScript now knows userId is a string
-    const userId: string = auth.userId;
+    // By checking for sessionId first, TS allows access to userId safely
+    const userId = auth.userId as string;
 
-    // 4. Call your AI Engine
     console.log(`🤖 Generating plan for user: ${userId}`);
     const plan = await generateDailyPlan(userId);
     
     return res.status(200).json(plan);
 
   } catch (error: any) {
-    console.error("AI API Error:", error.message);
-    return res.status(500).json({ 
-      error: "Failed to build plan", 
-      details: error.message 
-    });
+    console.error("Backend Error:", error.message);
+    return res.status(500).json({ error: "Internal Error", details: error.message });
   }
 }
