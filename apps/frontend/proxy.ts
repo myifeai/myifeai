@@ -1,12 +1,19 @@
 import { clerkMiddleware } from "@clerk/nextjs/server";
 
-export default clerkMiddleware();
+// We initialize the middleware once
+const middleware = clerkMiddleware();
+
+export function proxy(req: any, event: any) {
+  return middleware(req, event);
+}
+
+export default proxy;
 
 export const config = {
   matcher: [
-    // This new matcher covers EVERYTHING except very specific static folders
-    // It ensures that even 404s and internal calls are seen by Clerk
-    '/((?!_next/static|_next/image|favicon.ico).*)',
+    // Ensure API routes are covered
     '/(api|trpc)(.*)',
+    // Matches all pages, excludes static files
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 };
