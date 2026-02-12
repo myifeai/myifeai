@@ -2,6 +2,55 @@
 @tailwind components;
 @tailwind utilities;
 
+/* 1. The Professional Deep Background */
 body {
-  background-color: #f8fafc; /* light gray background */
+  background: radial-gradient(circle at top left, #1a1a2e, #16213e, #0f3460);
+  background-attachment: fixed; /* Keeps the gradient still while you scroll */
+  min-height: 100vh;
+  color: #ffffff;
+  font-family: 'Inter', sans-serif; /* Cleaner, more modern font */
+}
+
+@layer components {
+  /* 2. The Glassmorphism Card */
+  .glass-card {
+    background: rgba(255, 255, 255, 0.05); /* Semi-transparent white */
+    backdrop-filter: blur(12px); /* The "Frosted" effect */
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1); /* Subtle "rim" highlight */
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+    border-radius: 1.25rem;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .glass-card:hover {
+    transform: translateY(-4px); /* Interactive lift */
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.5);
+  }
+
+  /* 3. The Modern Writing Block */
+  .glass-input {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0.75rem;
+    color: white;
+    padding: 0.8rem;
+    outline: none;
+    width: 100%;
+    transition: all 0.3s ease;
+  }
+
+  .glass-input:focus {
+    background: rgba(0, 0, 0, 0.5);
+    border-color: #8b5cf6; /* Purple glow */
+    box-shadow: 0 0 15px rgba(139, 92, 246, 0.3);
+  }
+
+  /* 4. The "High-End" Button */
+  .btn-primary {
+    @apply bg-gradient-to-r from-purple-600 to-blue-500 hover:from-purple-500 hover:to-blue-400 
+           text-white font-bold py-2 px-6 rounded-full shadow-lg shadow-purple-500/20 
+           transition-all active:scale-95 flex items-center gap-2;
+  }
 }
