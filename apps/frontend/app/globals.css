@@ -2,89 +2,54 @@
 @tailwind components;
 @tailwind utilities;
 
-/* 1. THE DEEP SPACE CANVAS */
 body {
-  /* Darker, richer gradient for maximum glass contrast */
-  background: radial-gradient(circle at 0% 0%, #12122b 0%, #0a0a16 100%);
+  /* Richer gradient for better glass contrast */
+  background: radial-gradient(circle at 0% 0%, #0f172a 0%, #020617 100%);
   background-attachment: fixed;
   min-height: 100vh;
-  color: #f1f1f1;
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  color: #f8fafc;
+  font-family: 'Inter', sans-serif;
   overflow-x: hidden;
 }
 
 @layer components {
-  /* 2. THE PREMIUM GLASS ENGINE */
   .glass-card {
-    /* Multi-layered background for depth */
-    background: linear-gradient(
-      135deg,
-      rgba(255, 255, 255, 0.08) 0%,
-      rgba(255, 255, 255, 0.03) 100%
-    );
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
-    
-    /* The "Edge-Light" - makes it look like real glass */
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    box-shadow: 
-      0 4px 6px -1px rgba(0, 0, 0, 0.1), 
-      0 20px 40px -10px rgba(0, 0, 0, 0.5);
-    
-    border-radius: 1.5rem;
-    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+    border-radius: 24px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .glass-card:hover {
-    transform: translateY(-6px) scale(1.01);
-    background: rgba(255, 255, 255, 0.1);
-    border-color: rgba(255, 255, 255, 0.25);
-    box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.6);
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.15);
+    transform: translateY(-4px);
   }
 
-  /* 3. THE INTERACTIVE WRITING BOX */
   .glass-input {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.05);
     backdrop-filter: blur(4px);
-    border-radius: 1rem;
+    border-radius: 12px;
     color: white;
     padding: 1rem;
     width: 100%;
-    transition: all 0.3s ease;
+    outline: none;
+    transition: border 0.2s;
   }
 
   .glass-input:focus {
-    background: rgba(255, 255, 255, 0.07);
-    border-color: #a78bfa; /* Soft violet */
-    box-shadow: 0 0 20px rgba(167, 139, 250, 0.15);
-    outline: none;
+    border-color: rgba(139, 92, 246, 0.5);
   }
 
-  /* 4. THE NEON ACTION BUTTON */
   .btn-action {
-    @apply bg-white text-black font-bold py-3 px-8 rounded-2xl
-           transition-all duration-300 flex items-center gap-2
-           hover:bg-purple-500 hover:text-white hover:shadow-[0_0_30px_rgba(168,85,247,0.4)]
-           active:scale-95;
+    @apply bg-white text-black font-black py-4 px-6 rounded-2xl
+           transition-all duration-200 flex items-center justify-center gap-2
+           hover:bg-purple-500 hover:text-white active:scale-95;
+    letter-spacing: 0.1em;
+    font-size: 0.75rem;
   }
-
-  /* 5. XP PROGRESS BAR GLOW */
-  .xp-bar-fill {
-    @apply h-full rounded-full transition-all duration-1000 ease-out;
-    background: linear-gradient(90deg, #8b5cf6, #3b82f6);
-    box-shadow: 0 0 15px rgba(139, 92, 246, 0.6);
-  }
-}
-
-/* 6. AMBIENT BACKGROUND GLOWS */
-.bg-glow-purple {
-  position: fixed;
-  width: 500px;
-  height: 500px;
-  background: radial-gradient(circle, rgba(139, 92, 246, 0.15) 0%, transparent 70%);
-  top: -100px;
-  left: -100px;
-  z-index: -1;
-  pointer-events: none;
 }
