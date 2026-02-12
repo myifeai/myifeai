@@ -2,78 +2,64 @@
 
 import DailyPlan from '../components/Dashboard';
 import { motion } from 'framer-motion';
-import { Zap, Trophy, Crown } from 'lucide-react';
+import { Crown, Target } from 'lucide-react';
 
 export default function Page() {
-  // We can track this from your database later, for now let's set a visual goal
-  const currentXP = 60; 
-  const nextLevelXP = 100;
-  const progressPercent = (currentXP / nextLevelXP) * 100;
-
   return (
-    <main className="relative min-h-screen overflow-hidden px-4 py-8 md:py-12">
-      {/* 1. ANIMATED AMBIENT BACKGROUND (The "Stage 1" Glow) */}
-      <div className="fixed inset-0 -z-10 bg-[#0a0a1a]">
-        <div className="absolute top-[-10%] left-[-10%] h-[40%] w-[40%] rounded-full bg-purple-900/20 blur-[120px]" />
-        <div className="absolute bottom-[-10%] right-[-10%] h-[40%] w-[40%] rounded-full bg-blue-900/20 blur-[120px]" />
+    <main className="relative min-h-screen w-full overflow-x-hidden bg-[#050510] text-white font-sans">
+      {/* 1. THE GLOW BEHIND THE GLASS */}
+      <div className="fixed inset-0 -z-10">
+        <div className="absolute top-[-10%] left-[-10%] h-[500px] w-[500px] rounded-full bg-purple-600/15 blur-[120px]" />
+        <div className="absolute bottom-[10%] right-[0%] h-[400px] w-[400px] rounded-full bg-blue-600/15 blur-[100px]" />
       </div>
 
-      <div className="container mx-auto max-w-4xl">
-        {/* 2. DYNAMIC HEADER SECTION */}
-        <motion.header 
+      <div className="container mx-auto max-w-4xl px-4 py-12">
+        {/* 2. TOP COMMAND HEADER */}
+        <motion.div 
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="glass-card mb-8 p-6 flex flex-col md:flex-row items-center justify-between gap-6"
+          className="glass-card p-6 mb-12 flex flex-col md:flex-row items-center justify-between gap-6"
         >
-          <div className="flex items-center gap-4">
-            <div className="p-3 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-2xl shadow-lg shadow-orange-500/20">
-              <Crown className="text-white" size={32} />
+          <div className="flex items-center gap-5">
+            <div className="relative">
+              <div className="absolute inset-0 bg-purple-500 blur-lg opacity-40 animate-pulse" />
+              <div className="relative p-4 bg-gradient-to-br from-purple-600 to-blue-600 rounded-2xl border border-white/20">
+                <Crown size={28} className="text-white" />
+              </div>
             </div>
             <div>
-              <h1 className="text-3xl font-black tracking-tight text-white">
-                LIFE <span className="text-blue-500">CEO</span>
+              <h1 className="text-2xl font-black tracking-tighter uppercase">
+                Life <span className="text-purple-500">CEO</span> Intel
               </h1>
-              <p className="text-gray-400 text-sm font-medium">Lvl 1 • Executive Strategist</p>
+              <p className="text-gray-400 text-xs font-bold tracking-[0.2em] uppercase">Status: Operational</p>
             </div>
           </div>
 
-          {/* 3. XP PROGRESS BAR (The Interactive Element) */}
-          <div className="w-full md:w-64">
-            <div className="flex justify-between items-end mb-2">
-              <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Growth Progress</span>
-              <span className="text-xs font-bold text-purple-400">{currentXP}/{nextLevelXP} XP</span>
-            </div>
-            <div className="h-3 w-full bg-black/40 rounded-full overflow-hidden border border-white/5">
-              <motion.div 
-                initial={{ width: 0 }}
-                animate={{ width: `${progressPercent}%` }}
-                transition={{ duration: 1.5, ease: "easeOut" }}
-                className="h-full bg-gradient-to-r from-purple-600 to-blue-500 shadow-[0_0_15px_rgba(139,92,246,0.5)]"
-              />
-            </div>
+          <div className="flex gap-4">
+             <div className="flex flex-col items-center px-4 py-2 bg-white/5 rounded-xl border border-white/10">
+                <span className="text-[10px] text-gray-500 font-bold uppercase">System Rank</span>
+                <span className="text-lg font-black text-blue-400">EXECUTIVE</span>
+             </div>
+             <div className="flex flex-col items-center px-4 py-2 bg-white/5 rounded-xl border border-white/10">
+                <span className="text-[10px] text-gray-500 font-bold uppercase">Focus Score</span>
+                <span className="text-lg font-black text-purple-400">92%</span>
+             </div>
           </div>
-        </motion.header>
+        </motion.div>
 
-        {/* 4. MAIN CONTENT AREA */}
-        <motion.section
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
+        {/* 3. MAIN DASHBOARD CONTENT */}
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.98 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
         >
           <DailyPlan />
-        </motion.section>
+        </motion.div>
 
-        {/* 5. FOOTER STATS (Quick Wins) */}
-        <footer className="mt-8 grid grid-cols-2 md:grid-cols-3 gap-4">
-          <div className="glass-card p-4 flex items-center gap-3">
-            <Zap className="text-yellow-400" size={20} />
-            <span className="text-sm font-semibold">3 Streak</span>
-          </div>
-          <div className="glass-card p-4 flex items-center gap-3">
-            <Trophy className="text-blue-400" size={20} />
-            <span className="text-sm font-semibold">12 Tasks</span>
-          </div>
-        </footer>
+        {/* 4. SUBTLE FOOTER */}
+        <p className="mt-12 text-center text-gray-600 text-[10px] font-bold tracking-widest uppercase">
+          Neural Interface Secured • 2026 Edition
+        </p>
       </div>
     </main>
   );
