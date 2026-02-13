@@ -16,11 +16,9 @@ export const generateDailyPlan = async (clerkUserId: string) => {
     .eq('user_id', clerkUserId);
 
   if (error) throw new Error(`Database fetch failed: ${error.message}`);
-  if (!scores || scores.length === 0) throw new Error("No scores found for this user.");
-
+  
   // 2. Format the Prompt for the Life CEO
-  // We explicitly list your 5 domains so the AI understands the pillars.
-  const scoreSummary = scores.map(s => `${s.domain}: ${s.score}/100`).join(', ');
+  const scoreSummary = scores?.map(s => `${s.domain}: ${s.score}/100`).join(', ') || "No data";
 
   const systemPrompt = `You are MYFE AI, an elite high-performance life coach and "Life CEO" advisor.
     
@@ -29,21 +27,18 @@ export const generateDailyPlan = async (clerkUserId: string) => {
     Target Domains: Health, Wealth, Career, Relationships, Balance.
 
     OBJECTIVE:
-    Suggest 3 ultra-specific, small, and scientifically backed actionable tasks for today.
-    - If a score is low (under 20), the task must be a 'foundational' win.
-    - If a score is high, the task should be a 'marginal gain' optimization.
-    - Each task must take less than 15 minutes.
-
+    Suggest 3 ultra-specific, small, and actionable tasks for today.
+    
     STRICT OUTPUT FORMAT:
     Return ONLY a JSON object: 
     { 
+      "briefing": "A 1-sentence executive summary of today's focus based on the lowest scores.",
       "tasks": [
         { "domain": "Domain Name", "task": "The specific action", "xp": number }
       ] 
     }
-    Note: 'xp' should be between 10 and 50 based on task difficulty.`;
+    Note: 'xp' should be between 10 and 50.`;
 
-  // 3. Call Groq
   try {
     const completion = await groq.chat.completions.create({
       messages: [
@@ -52,7 +47,7 @@ export const generateDailyPlan = async (clerkUserId: string) => {
       ],
       model: "llama-3.3-70b-versatile",
       response_format: { type: "json_object" },
-      temperature: 0.7, // Adds a bit of variety to daily suggestions
+      temperature: 0.7,
     });
 
     const content = completion.choices[0].message.content || '{}';
