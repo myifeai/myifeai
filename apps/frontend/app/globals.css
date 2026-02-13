@@ -1,6 +1,8 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* stylelint-disable at-rule-no-unknown */
+
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
 
 body {
   background: radial-gradient(ellipse at top left, #2d1b2e 0%, #1a1625 50%, #0f0a15 100%);
@@ -47,9 +49,27 @@ body {
   }
 
   .btn-action {
-    @apply bg-white text-black font-black py-4 px-6 rounded-2xl
-    flex items-center justify-center gap-2 uppercase tracking-widest
-    hover:bg-purple-500 hover:text-white active:scale-95 transition-all;
+    background-color: #ffffff;
+    color: #000000;
+    font-weight: 900;
+    padding: 1rem 1.5rem;
+    border-radius: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    transition: all .2s ease-in-out;
+  }
+
+  .btn-action:hover {
+    background-color: #7c3aed;
+    color: #ffffff;
+  }
+
+  .btn-action:active {
+    transform: scale(.95);
   }
 }
 
@@ -65,3 +85,5 @@ body {
 ::selection {
   background: rgba(168, 85, 247, 0.3);
 }
+
+/* stylelint-enable at-rule-no-unknown */
