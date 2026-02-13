@@ -17,54 +17,59 @@ export const generateDailyPlan = async (clerkUserId: string) => {
 
   if (error) throw new Error(`Database fetch failed: ${error.message}`);
   
-  // 2. NEW: Fetch last 5 task logs to provide "Memory"
+  // 2. Fetch last 10 task logs for memory
   const { data: history } = await supabase
     .from('task_logs')
-    .select('task_text')
+    .select('task_text, domain')
     .eq('user_id', clerkUserId)
     .order('completed_at', { ascending: false })
-    .limit(5);
+    .limit(10);
 
-  const scoreSummary = scores?.map(s => `${s.domain}: ${s.score}/100`).join(', ') || "No data";
-  const historySummary = history?.map(h => h.task_text).join(', ') || "No previous tasks";
+  const scoreSummary = scores?.map(s => `${s.domain}: ${s.score}`).join(', ') || "No data";
+  const historySummary = history?.map(h => `[${h.domain}] ${h.task_text}`).join(', ') || "No previous tasks";
 
   const systemPrompt = `You are MYFE AI, an elite high-performance life coach and "Life CEO" advisor.
     
     USER DATA:
     Current Scores: ${scoreSummary}
-    Recent History: ${historySummary}
+    Recent History (Do NOT repeat these): ${historySummary}
+
+    AVAILABLE DOMAINS: Health, Wealth, Career, Relationships, Balance.
 
     OBJECTIVE:
-    Suggest 3 ultra-specific, small, and actionable tasks for today.
+    Suggest 3 ultra-specific tactical objectives for today.
     
-    CRITICAL RULES:
-    - Do NOT repeat tasks from the user's recent history.
-    - If a domain score is high (>100), make the task "Optimization" focused.
-    - If a domain score is low, make it "Foundational" focused.
+    STRICT RULES FOR VARIETY & LEVELING:
+    1. DOMAIN DIVERSITY: You MUST pick 3 DIFFERENT domains. Never suggest two tasks for the same domain in one plan.
+    2. ROTATION: Prioritize domains that are NOT in the recent history to ensure a balanced life.
+    3. LEVELING: The user is at LEVEL 2 (2500+ XP). Tasks should be "High-Leverage" and strategic.
+    4. ACTIONABLE: Tasks must be completable in 15-45 minutes.
 
     STRICT OUTPUT FORMAT:
     Return ONLY a JSON object: 
     { 
-      "briefing": "A 1-sentence executive summary of today's focus.",
+      "briefing": "A 1-sentence executive summary focused on balance and high-performance.",
       "tasks": [
-        { "domain": "Domain Name", "task": "The specific action", "xp": number }
+        { "domain": "Domain Name", "task": "The specific high-leverage action", "xp": number }
       ] 
     }`;
 
   try {
+    // FIXED: The correct method path is .chat.completions.create
     const completion = await groq.chat.completions.create({
       messages: [
         { role: "system", content: systemPrompt },
-        { role: "user", content: "Analyze my history and scores to generate my tactical plan." }
+        { role: "user", content: "Analyze my status and provide today's 3-domain tactical spread." }
       ],
       model: "llama-3.3-70b-versatile",
       response_format: { type: "json_object" },
-      temperature: 0.7,
+      temperature: 0.8, 
     });
 
     const content = completion.choices[0].message.content || '{}';
     return JSON.parse(content);
   } catch (aiError: any) {
+    console.error("AI Error:", aiError);
     throw new Error("AI Generation failed.");
   }
 };
