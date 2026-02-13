@@ -1,5 +1,5 @@
-import { ClerkProvider, SignInButton, SignedIn, SignedOut, UserButton } from '@clerk/nextjs';
-import './globals.css';
+import { ClerkProvider, SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
+import "./globals.css";
 
 export default function RootLayout({
   children,
@@ -9,33 +9,38 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="en">
-        <body className="bg-slate-50 min-h-screen">
-          <header className="flex justify-between items-center p-4 bg-white shadow-sm">
-            <h1 className="font-black text-xl tracking-tighter text-blue-600">LIFE CEO</h1>
-            {/* Clerk User Management */}
-            <SignedOut>
-              <SignInButton mode="modal">
-                <button className="bg-blue-600 text-white px-4 py-2 rounded-lg font-bold text-sm">
-                  Sign In
-                </button>
-              </SignInButton>
-            </SignedOut>
-            <SignedIn>
-              <UserButton afterSignOutUrl="/" />
-            </SignedIn>
+        <body>
+          <header className="fixed top-0 inset-x-0 z-50 backdrop-blur-xl bg-black/30 border-b border-white/5">
+            <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+              <h1 className="font-black tracking-tight text-lg">
+                LIFE <span className="text-purple-400">CEO</span>
+              </h1>
+
+              <SignedOut>
+                <SignInButton mode="modal">
+                  <button className="glass-card-secondary px-4 py-2 text-sm font-bold">
+                    Sign In
+                  </button>
+                </SignInButton>
+              </SignedOut>
+
+              <SignedIn>
+                <UserButton afterSignOutUrl="/" />
+              </SignedIn>
+            </div>
           </header>
 
-          <main>
-            {/* Only show the dashboard if the user is signed in */}
-            <SignedIn>
-              {children}
-            </SignedIn>
-            
-            {/* Show a welcome message if they are signed out */}
+          <main className="pt-20">
+            <SignedIn>{children}</SignedIn>
+
             <SignedOut>
-              <div className="text-center py-20">
-                <h2 className="text-3xl font-bold">Ready to optimize your life?</h2>
-                <p className="text-gray-500 mt-2">Sign in to access your AI-powered strategic plan.</p>
+              <div className="min-h-screen flex flex-col items-center justify-center text-center px-6">
+                <h2 className="text-4xl font-black mb-4">
+                  Become the CEO of Your Life
+                </h2>
+                <p className="text-gray-400 max-w-md">
+                  Sign in to unlock your AI-powered daily strategy engine.
+                </p>
               </div>
             </SignedOut>
           </main>
