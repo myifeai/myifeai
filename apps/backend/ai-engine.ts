@@ -9,7 +9,7 @@ const supabase = createClient(
 );
 
 export const generateDailyPlan = async (clerkUserId: string) => {
-  // 1. Fetch scores from Supabase
+  // 1. Fetch current scores
   const { data: scores, error } = await supabase
     .from('life_scores')
     .select('domain, score')
@@ -17,33 +17,45 @@ export const generateDailyPlan = async (clerkUserId: string) => {
 
   if (error) throw new Error(`Database fetch failed: ${error.message}`);
   
-  // 2. Format the Prompt for the Life CEO
+  // 2. NEW: Fetch last 5 task logs to provide "Memory"
+  const { data: history } = await supabase
+    .from('task_logs')
+    .select('task_text')
+    .eq('user_id', clerkUserId)
+    .order('completed_at', { ascending: false })
+    .limit(5);
+
   const scoreSummary = scores?.map(s => `${s.domain}: ${s.score}/100`).join(', ') || "No data";
+  const historySummary = history?.map(h => h.task_text).join(', ') || "No previous tasks";
 
   const systemPrompt = `You are MYFE AI, an elite high-performance life coach and "Life CEO" advisor.
     
     USER DATA:
     Current Scores: ${scoreSummary}
-    Target Domains: Health, Wealth, Career, Relationships, Balance.
+    Recent History: ${historySummary}
 
     OBJECTIVE:
     Suggest 3 ultra-specific, small, and actionable tasks for today.
     
+    CRITICAL RULES:
+    - Do NOT repeat tasks from the user's recent history.
+    - If a domain score is high (>100), make the task "Optimization" focused.
+    - If a domain score is low, make it "Foundational" focused.
+
     STRICT OUTPUT FORMAT:
     Return ONLY a JSON object: 
     { 
-      "briefing": "A 1-sentence executive summary of today's focus based on the lowest scores.",
+      "briefing": "A 1-sentence executive summary of today's focus.",
       "tasks": [
         { "domain": "Domain Name", "task": "The specific action", "xp": number }
       ] 
-    }
-    Note: 'xp' should be between 10 and 50.`;
+    }`;
 
   try {
     const completion = await groq.chat.completions.create({
       messages: [
         { role: "system", content: systemPrompt },
-        { role: "user", content: "Analyze my life scores and generate my strategic plan for today." }
+        { role: "user", content: "Analyze my history and scores to generate my tactical plan." }
       ],
       model: "llama-3.3-70b-versatile",
       response_format: { type: "json_object" },
@@ -52,9 +64,7 @@ export const generateDailyPlan = async (clerkUserId: string) => {
 
     const content = completion.choices[0].message.content || '{}';
     return JSON.parse(content);
-
   } catch (aiError: any) {
-    console.error("Groq AI Error:", aiError.message);
     throw new Error("AI Generation failed.");
   }
 };
